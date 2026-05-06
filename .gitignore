@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# clerk configuration (can include secrets)
+/.clerk/
+
+# hardhat / solidity build outputs (regenerate: npx hardhat compile)
+/artifacts/
+/cache/
+
+# IDE / local tooling (optional; safe to ignore)
+.cursor/
+.agents/
+.claude/
