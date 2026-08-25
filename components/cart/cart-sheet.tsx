@@ -15,15 +15,17 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { CartItem } from "./cart-item";
-import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { setCartOpen } from "@/lib/store/ui-slice";
 
 export function CartSheet() {
   const { isSignedIn } = useUser();
   const { cartItems, cartCount, cartTotal } = useCart();
-  const [open, setOpen] = useState(false);
+  const open = useAppSelector((state) => state.ui.cartOpen);
+  const dispatch = useAppDispatch();
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={(next) => dispatch(setCartOpen(next))}>
       <SheetTrigger className="relative inline-flex items-center justify-center rounded-md h-9 w-9 hover:bg-accent hover:text-accent-foreground">
         <ShoppingCart className="h-5 w-5" />
         {isSignedIn && cartCount > 0 && (
@@ -68,10 +70,10 @@ export function CartSheet() {
                 <span>Subtotal</span>
                 <span>${(cartTotal / 100).toFixed(2)}</span>
               </div>
-              <Link href="/checkout" onClick={() => setOpen(false)}>
+              <Link href="/checkout" onClick={() => dispatch(setCartOpen(false))}>
                 <Button className="w-full">Proceed to Checkout</Button>
               </Link>
-              <Link href="/cart" onClick={() => setOpen(false)}>
+              <Link href="/cart" onClick={() => dispatch(setCartOpen(false))}>
                 <Button variant="outline" className="w-full mt-2">
                   View Full Cart
                 </Button>

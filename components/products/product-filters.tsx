@@ -4,26 +4,17 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Id } from "@/convex/_generated/dataModel";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { setProductCategory, setProductType } from "@/lib/store/ui-slice";
 
-interface ProductFiltersProps {
-  selectedCategory: Id<"categories"> | null;
-  selectedType: "physical" | "digital" | null;
-  onCategoryChange: (id: Id<"categories"> | null) => void;
-  onTypeChange: (type: "physical" | "digital" | null) => void;
-}
-
-export function ProductFilters({
-  selectedCategory,
-  selectedType,
-  onCategoryChange,
-  onTypeChange,
-}: ProductFiltersProps) {
+export function ProductFilters() {
   const categories = useQuery(api.categories.listActive);
+  const selectedCategory = useAppSelector((state) => state.ui.productCategoryId);
+  const selectedType = useAppSelector((state) => state.ui.productType);
+  const dispatch = useAppDispatch();
 
   return (
     <div className="space-y-6">
-      {/* Categories */}
       <div>
         <h3 className="font-semibold mb-3">Categories</h3>
         <div className="space-y-1">
@@ -31,7 +22,7 @@ export function ProductFilters({
             variant={selectedCategory === null ? "secondary" : "ghost"}
             size="sm"
             className="w-full justify-start"
-            onClick={() => onCategoryChange(null)}
+            onClick={() => dispatch(setProductCategory(null))}
           >
             All Categories
           </Button>
@@ -41,7 +32,7 @@ export function ProductFilters({
               variant={selectedCategory === cat._id ? "secondary" : "ghost"}
               size="sm"
               className="w-full justify-start"
-              onClick={() => onCategoryChange(cat._id)}
+              onClick={() => dispatch(setProductCategory(cat._id))}
             >
               {cat.name}
             </Button>
@@ -51,7 +42,6 @@ export function ProductFilters({
 
       <Separator />
 
-      {/* Product Type */}
       <div>
         <h3 className="font-semibold mb-3">Product Type</h3>
         <div className="space-y-1">
@@ -59,7 +49,7 @@ export function ProductFilters({
             variant={selectedType === null ? "secondary" : "ghost"}
             size="sm"
             className="w-full justify-start"
-            onClick={() => onTypeChange(null)}
+            onClick={() => dispatch(setProductType(null))}
           >
             All Types
           </Button>
@@ -67,7 +57,7 @@ export function ProductFilters({
             variant={selectedType === "physical" ? "secondary" : "ghost"}
             size="sm"
             className="w-full justify-start"
-            onClick={() => onTypeChange("physical")}
+            onClick={() => dispatch(setProductType("physical"))}
           >
             Physical
           </Button>
@@ -75,7 +65,7 @@ export function ProductFilters({
             variant={selectedType === "digital" ? "secondary" : "ghost"}
             size="sm"
             className="w-full justify-start"
-            onClick={() => onTypeChange("digital")}
+            onClick={() => dispatch(setProductType("digital"))}
           >
             Digital
           </Button>

@@ -2,25 +2,14 @@
 
 import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { fetchWalletNfts, nftKeys } from "@/lib/query/nfts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink, ImageIcon, Wallet, Plus } from "lucide-react";
-
-interface NFT {
-  tokenId: number;
-  nftType: string;
-  orderId: string;
-  productId: string;
-  loyaltyTier: string;
-  mintedAt: number;
-  name: string;
-  description: string;
-  image: string;
-  attributes: Array<{ trait_type: string; value: string }>;
-}
 
 const TYPE_COLORS: Record<string, string> = {
   Receipt: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -32,34 +21,16 @@ const nftContractAddress = process.env.NEXT_PUBLIC_SOPHO_NFT_ADDRESS;
 
 export function NftGallery() {
   const { address, isConnected } = useAccount();
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadNfts = useCallback(async (walletAddress: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch(`/api/nfts?address=${walletAddress}`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setNfts(data);
-      } else {
-        setError(data.error || "Failed to load NFTs");
-      }
-    } catch {
-      setError("Failed to load NFTs");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!address) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadNfts(address);
-  }, [address, loadNfts]);
+  const {
+    data: nfts = [],
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: nftKeys.wallet(address ?? ""),
+    queryFn: () => fetchWalletNfts(address!),
+    enabled: Boolean(address),
+  });
+  const error = queryError instanceof Error ? queryError.message : null;
 
   const addToMetaMask = useCallback(async (tokenId: number) => {
     if (!nftContractAddress || typeof window === "undefined" || !window.ethereum) return;

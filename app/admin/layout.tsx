@@ -12,6 +12,7 @@ import {
   FolderTree,
   MessageSquare,
   BarChart3,
+  Gem,
   ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ const sidebarLinks = [
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/nft-analytics", label: "NFT Analytics", icon: Gem },
 ];
 
 export default function AdminLayout({

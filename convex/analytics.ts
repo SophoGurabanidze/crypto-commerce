@@ -1,5 +1,6 @@
 import { query } from "./_generated/server";
 import { requireAdmin } from "./lib/helpers";
+import { v } from "convex/values";
 
 export const getDashboardStats = query({
   handler: async (ctx) => {
@@ -74,5 +75,21 @@ export const getDashboardStats = query({
       recentOrders,
       monthlyRevenue,
     };
+  },
+});
+
+export const getWalletUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    const users = await ctx.db.query("users").take(500);
+    return users
+      .filter((u) => u.walletAddress)
+      .map((u) => ({
+        _id: u._id,
+        name: u.name,
+        email: u.email,
+        walletAddress: u.walletAddress!,
+      }));
   },
 });

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { ReduxProvider } from "@/components/providers/redux-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -32,12 +34,16 @@ export default function RootLayout({
       style={fontVars}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <ConvexClientProvider>
-            {children}
-            <Toaster />
-          </ConvexClientProvider>
-        </ThemeProvider>
+        <QueryProvider>
+          <ReduxProvider>
+            <ThemeProvider>
+              <ConvexClientProvider>
+                {children}
+                <Toaster />
+              </ConvexClientProvider>
+            </ThemeProvider>
+          </ReduxProvider>
+        </QueryProvider>
       </body>
     </html>
   );

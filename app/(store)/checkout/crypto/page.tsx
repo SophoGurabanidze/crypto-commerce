@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Web3Provider } from "@/components/providers/web3-provider";
+import { SolanaProvider } from "@/components/providers/solana-provider";
 import { CryptoPaymentPanel } from "@/components/checkout/crypto/crypto-payment-panel";
 import { OrderSummary } from "@/components/checkout/order-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,7 @@ export default function CryptoCheckoutPage() {
 
   return (
     <Web3Provider>
+    <SolanaProvider>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Crypto Payment</h1>
 
@@ -88,6 +90,7 @@ export default function CryptoCheckoutPage() {
           </div>
         </div>
       </div>
+    </SolanaProvider>
     </Web3Provider>
   );
 }

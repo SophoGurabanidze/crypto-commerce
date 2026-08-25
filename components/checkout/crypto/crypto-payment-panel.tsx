@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 import { Id } from "@/convex/_generated/dataModel";
@@ -11,9 +10,10 @@ import { cn } from "@/lib/utils";
 import { DirectTransfer } from "./direct-transfer";
 import { EscrowPayment } from "./escrow-payment";
 import { StablecoinPayment } from "./stablecoin-payment";
-import { Wallet, Shield, DollarSign } from "lucide-react";
-
-type CryptoMethod = "direct" | "escrow" | "stablecoin";
+import { Sph2Payment } from "./sph2-payment";
+import { Wallet, Shield, DollarSign, Coins } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { setCryptoMethod } from "@/lib/store/ui-slice";
 
 interface CryptoPaymentPanelProps {
   orderId: Id<"orders">;
@@ -39,6 +39,12 @@ const methods = [
     icon: DollarSign,
     desc: "SPH / USDC / USDT",
   },
+  {
+    key: "sph2" as const,
+    label: "SPH2",
+    icon: Coins,
+    desc: "Sopho 2 (Solana)",
+  },
 ];
 
 export function CryptoPaymentPanel({
@@ -46,58 +52,65 @@ export function CryptoPaymentPanel({
   amountUsd,
 }: CryptoPaymentPanelProps) {
   const { isConnected } = useAccount();
-  const [method, setMethod] = useState<CryptoMethod>("direct");
+  const method = useAppSelector((state) => state.ui.cryptoMethod);
+  const dispatch = useAppDispatch();
 
   return (
     <div className="space-y-6">
-      {/* Connect Wallet */}
-      <div className="flex justify-center">
-        <ConnectButton />
+      {/* Method selector — SPH2 always visible, others need ETH wallet */}
+      <div className="grid grid-cols-4 gap-3">
+        {methods.map((m) => (
+          <Button
+            key={m.key}
+            variant="outline"
+            className={cn(
+              "h-auto flex flex-col items-center gap-1 py-3",
+              method === m.key && "border-primary ring-1 ring-primary"
+            )}
+            onClick={() => dispatch(setCryptoMethod(m.key))}
+          >
+            <m.icon className="h-5 w-5" />
+            <span className="text-xs font-medium">{m.label}</span>
+            <span className="text-[10px] text-muted-foreground">{m.desc}</span>
+          </Button>
+        ))}
       </div>
 
-      {!isConnected ? (
-        <p className="text-center text-muted-foreground">
-          Connect your wallet to continue with crypto payment.
-        </p>
+      <Separator />
+
+      {/* SPH2 payment — standalone Solana flow */}
+      {method === "sph2" ? (
+        <Card>
+          <CardContent className="p-6">
+            <Sph2Payment amountUsd={amountUsd} />
+          </CardContent>
+        </Card>
       ) : (
         <>
-          {/* Method selector */}
-          <div className="grid grid-cols-3 gap-3">
-            {methods.map((m) => (
-              <Button
-                key={m.key}
-                variant="outline"
-                className={cn(
-                  "h-auto flex flex-col items-center gap-1 py-3",
-                  method === m.key && "border-primary ring-1 ring-primary"
-                )}
-                onClick={() => setMethod(m.key)}
-              >
-                <m.icon className="h-5 w-5" />
-                <span className="text-xs font-medium">{m.label}</span>
-                <span className="text-[10px] text-muted-foreground">
-                  {m.desc}
-                </span>
-              </Button>
-            ))}
+          {/* ETH wallet connect */}
+          <div className="flex justify-center">
+            <ConnectButton />
           </div>
 
-          <Separator />
-
-          {/* Payment form */}
-          <Card>
-            <CardContent className="p-6">
-              {method === "direct" && (
-                <DirectTransfer orderId={orderId} amountUsd={amountUsd} />
-              )}
-              {method === "escrow" && (
-                <EscrowPayment orderId={orderId} amountUsd={amountUsd} />
-              )}
-              {method === "stablecoin" && (
-                <StablecoinPayment orderId={orderId} amountUsd={amountUsd} />
-              )}
-            </CardContent>
-          </Card>
+          {!isConnected ? (
+            <p className="text-center text-muted-foreground">
+              Connect your wallet to continue with crypto payment.
+            </p>
+          ) : (
+            <Card>
+              <CardContent className="p-6">
+                {method === "direct" && (
+                  <DirectTransfer orderId={orderId} amountUsd={amountUsd} />
+                )}
+                {method === "escrow" && (
+                  <EscrowPayment orderId={orderId} amountUsd={amountUsd} />
+                )}
+                {method === "stablecoin" && (
+                  <StablecoinPayment orderId={orderId} amountUsd={amountUsd} />
+                )}
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>
